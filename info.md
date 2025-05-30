@@ -1,4 +1,4 @@
-# Calendar Day View Card for Home Assistant
+# Calendar Day View
 
 This is a custom card for Home Assistant that displays calendar events in a daily view similar to Google Calendar.
 
@@ -12,21 +12,8 @@ This is a custom card for Home Assistant that displays calendar events in a dail
 
 ## Installation
 
-1. Copy the `calendar-day-view.js` file to the `www` folder in your Home Assistant installation
-   - If the `www` folder doesn't exist, create it in the root of your Home Assistant configuration
-
-2. Add the reference to the card in your `configuration.yaml` file:
-```yaml
-frontend:
-  extra_module_url:
-    - /local/calendar-day-view.js
-```
-
-3. Restart Home Assistant
-
-## Usage
-
-Add the card to your dashboard using the UI editor or by adding the following code to your dashboard:
+1. Install this repository using HACS
+2. Add the card to your dashboard using the UI editor or by adding the following code to your dashboard:
 
 ```yaml
 type: 'custom:calendar-day-view'

@@ -1,0 +1,7 @@
+{
+  "name": "Calendar Day View",
+  "render_readme": true,
+  "domains": ["frontend"],
+  "homeassistant": "2023.1.0",
+  "iot_class": "calculated"
+} 

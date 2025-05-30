@@ -1,0 +1,7 @@
+# Ignore development files
+*.md
+!README.md
+!info.md
+.git*
+.hacsignore
+hacs.json 
