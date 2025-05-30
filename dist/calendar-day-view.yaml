@@ -1,0 +1,54 @@
+name: Calendar Day View
+description: A custom card that shows calendar events in a day view format
+filename: calendar-day-view.js
+content_in_root: false
+type: module
+
+schema:
+  type: object
+  properties:
+    entity:
+      type: string
+      required: true
+      description: The calendar entity to display
+    title:
+      type: string
+      required: false
+      description: Custom title for the card
+    show_header:
+      type: boolean
+      required: false
+      description: Show the card header
+      default: true
+    show_time:
+      type: boolean
+      required: false
+      description: Show event times
+      default: true
+    event_height:
+      type: integer
+      required: false
+      description: Height of each hour row in pixels
+      default: 60
+    event_color:
+      type: string
+      required: false
+      description: Default color for events
+      default: "#4285f4"
+
+examples:
+  - title: Basic Calendar View
+    description: Shows a basic calendar view with default settings
+    data:
+      entity: calendar.google_calendar
+      title: "My Calendar"
+
+  - title: Customized Calendar View
+    description: Shows a calendar view with custom settings
+    data:
+      entity: calendar.google_calendar
+      title: "Work Calendar"
+      show_header: true
+      show_time: true
+      event_height: 80
+      event_color: "#ff5722" 

@@ -5,11 +5,19 @@ class CalendarDayView extends HTMLElement {
   }
 
   setConfig(config) {
-    this.config = config;
+    console.log('Calendar Day View: Setting config', config);
+    this.config = {
+      show_header: true,
+      show_time: true,
+      event_height: 60,
+      event_color: '#4285f4',
+      ...config
+    };
     this.render();
   }
 
   async render() {
+    console.log('Calendar Day View: Rendering');
     if (!this.config || !this.config.entity) {
       this.shadowRoot.innerHTML = `
         <ha-card>
@@ -19,72 +27,128 @@ class CalendarDayView extends HTMLElement {
       return;
     }
 
-    const hours = Array.from({ length: 24 }, (_, i) => i);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    try {
+      const hours = Array.from({ length: 24 }, (_, i) => i);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    const state = await this.getCalendarEvents();
-    const events = this.processEvents(state, today);
+      console.log('Calendar Day View: Fetching events for entity', this.config.entity);
+      const state = await this.getCalendarEvents();
+      console.log('Calendar Day View: Received events', state);
 
-    this.shadowRoot.innerHTML = `
-      <ha-card>
-        <div class="calendar-container">
-          <div class="header">
-            <div class="time-column"></div>
-            <div class="events-column">
-              <div class="date-header">${today.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+      const events = this.processEvents(state, today);
+      console.log('Calendar Day View: Processed events', events);
+
+      this.shadowRoot.innerHTML = `
+        <ha-card>
+          ${this.config.show_header ? `
+            <div class="card-header">
+              ${this.config.title || 'Calendar'}
+            </div>
+          ` : ''}
+          <div class="calendar-container">
+            <div class="header">
+              <div class="time-column"></div>
+              <div class="events-column">
+                <div class="date-header">${today.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+              </div>
+            </div>
+            <div class="calendar-body">
+              ${hours.map(hour => `
+                <div class="hour-row">
+                  <div class="time-column">
+                    <div class="hour-label">${hour.toString().padStart(2, '0')}:00</div>
+                  </div>
+                  <div class="events-column">
+                    ${this.renderEventsForHour(events, hour)}
+                  </div>
+                </div>
+              `).join('')}
             </div>
           </div>
-          <div class="calendar-body">
-            ${hours.map(hour => `
-              <div class="hour-row">
-                <div class="time-column">
-                  <div class="hour-label">${hour.toString().padStart(2, '0')}:00</div>
-                </div>
-                <div class="events-column">
-                  ${this.renderEventsForHour(events, hour)}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </ha-card>
-    `;
+        </ha-card>
+      `;
 
-    this.applyStyles();
+      this.applyStyles();
+    } catch (error) {
+      console.error('Calendar Day View: Error rendering', error);
+      this.shadowRoot.innerHTML = `
+        <ha-card>
+          <div class="error">Error loading calendar: ${error.message}</div>
+        </ha-card>
+      `;
+    }
   }
 
   async getCalendarEvents() {
+    if (!this.hass) {
+      throw new Error('Home Assistant instance not available');
+    }
+
     const entity = this.config.entity;
-    const state = await this.hass.callWS({
-      type: 'calendar/list_events',
-      entity_id: entity,
-      start_date_time: new Date().toISOString(),
-      end_date_time: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
-    });
-    return state;
+    console.log('Calendar Day View: Requesting events for', entity);
+    
+    try {
+      const state = await this.hass.callWS({
+        type: 'calendar/list_events',
+        entity_id: entity,
+        start_date_time: new Date().toISOString(),
+        end_date_time: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+      });
+      
+      if (!state || !Array.isArray(state)) {
+        console.warn('Calendar Day View: No events received or invalid response', state);
+        return [];
+      }
+      
+      return state;
+    } catch (error) {
+      console.error('Calendar Day View: Error fetching events', error);
+      throw new Error(`Failed to fetch calendar events: ${error.message}`);
+    }
   }
 
   processEvents(state, today) {
+    if (!state || !Array.isArray(state)) {
+      console.warn('Calendar Day View: Invalid state received', state);
+      return [];
+    }
+
     return state.map(event => {
-      const start = new Date(event.start.dateTime || event.start.date);
-      const end = new Date(event.end.dateTime || event.end.date);
-      return {
-        ...event,
-        start,
-        end,
-        startHour: start.getHours(),
-        endHour: end.getHours(),
-        startMinutes: start.getMinutes(),
-        endMinutes: end.getMinutes(),
-      };
+      try {
+        const start = new Date(event.start.dateTime || event.start.date);
+        const end = new Date(event.end.dateTime || event.end.date);
+        return {
+          ...event,
+          start,
+          end,
+          startHour: start.getHours(),
+          endHour: end.getHours(),
+          startMinutes: start.getMinutes(),
+          endMinutes: end.getMinutes(),
+        };
+      } catch (error) {
+        console.error('Calendar Day View: Error processing event', event, error);
+        return null;
+      }
     }).filter(event => {
-      const eventDate = new Date(event.start);
-      return eventDate.toDateString() === today.toDateString();
+      if (!event) return false;
+      try {
+        const eventDate = new Date(event.start);
+        return eventDate.toDateString() === today.toDateString();
+      } catch (error) {
+        console.error('Calendar Day View: Error filtering event', event, error);
+        return false;
+      }
     });
   }
 
   renderEventsForHour(events, hour) {
+    if (!events || !Array.isArray(events)) {
+      console.warn('Calendar Day View: Invalid events array', events);
+      return '';
+    }
+
     const hourEvents = events.filter(event => 
       (event.startHour === hour) || 
       (event.startHour < hour && event.endHour > hour)
@@ -96,7 +160,9 @@ class CalendarDayView extends HTMLElement {
         height: ${this.calculateEventHeight(event, hour)}%;
         background-color: ${this.getEventColor(event)};">
         <div class="event-content">
-          <div class="event-time">${this.formatTime(event.start)} - ${this.formatTime(event.end)}</div>
+          ${this.config.show_time ? `
+            <div class="event-time">${this.formatTime(event.start)} - ${this.formatTime(event.end)}</div>
+          ` : ''}
           <div class="event-title">${event.summary}</div>
         </div>
       </div>
@@ -114,7 +180,7 @@ class CalendarDayView extends HTMLElement {
   }
 
   getEventColor(event) {
-    return event.color || '#4285f4';
+    return event.color || this.config.event_color;
   }
 
   formatTime(date) {
@@ -126,6 +192,12 @@ class CalendarDayView extends HTMLElement {
     style.textContent = `
       .calendar-container {
         padding: 16px;
+      }
+      .card-header {
+        padding: 16px;
+        font-size: 1.2em;
+        font-weight: 500;
+        border-bottom: 1px solid var(--divider-color);
       }
       .header {
         display: flex;
@@ -143,7 +215,7 @@ class CalendarDayView extends HTMLElement {
       }
       .hour-row {
         display: flex;
-        height: 60px;
+        height: ${this.config.event_height}px;
         border-bottom: 1px solid #f0f0f0;
       }
       .time-column {
@@ -193,6 +265,7 @@ class CalendarDayView extends HTMLElement {
   }
 
   set hass(hass) {
+    console.log('Calendar Day View: Setting hass instance');
     this._hass = hass;
     this.render();
   }
