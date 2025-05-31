@@ -5,36 +5,51 @@ content_in_root: false
 type: module
 
 schema:
-  type: object
-  properties:
-    entity:
-      type: string
-      required: true
-      description: The calendar entity to display
-    title:
-      type: string
-      required: false
-      description: Custom title for the card
-    show_header:
-      type: boolean
-      required: false
-      description: Show the card header
-      default: true
-    show_time:
-      type: boolean
-      required: false
-      description: Show event times
-      default: true
-    event_height:
-      type: integer
-      required: false
-      description: Height of each hour row in pixels
-      default: 60
-    event_color:
-      type: string
-      required: false
-      description: Default color for events
-      default: "#4285f4"
+  entity:
+    name: Calendar Entity
+    description: The calendar entity to display
+    required: true
+    selector:
+      entity:
+        domain: calendar
+  title:
+    name: Title
+    description: The title of the card
+    required: false
+    default: Calendar
+    selector:
+      text: null
+  show_header:
+    name: Show Header
+    description: Whether to show the card header
+    required: false
+    default: true
+    selector:
+      boolean: null
+  show_time:
+    name: Show Time
+    description: Whether to show event times
+    required: false
+    default: true
+    selector:
+      boolean: null
+  event_height:
+    name: Event Height
+    description: Height of each hour row in pixels
+    required: false
+    default: 60
+    selector:
+      number:
+        min: 30
+        max: 120
+        step: 10
+  event_color:
+    name: Event Color
+    description: Default color for events
+    required: false
+    default: '#4285f4'
+    selector:
+      color_rgb: null
 
 examples:
   - title: Basic Calendar View
