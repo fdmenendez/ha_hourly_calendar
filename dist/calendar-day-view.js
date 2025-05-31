@@ -15,9 +15,7 @@ class CalendarDayView extends HTMLElement {
       event_color: '#4285f4',
       ...config
     };
-    if (this._hass) {
-      this.render();
-    }
+    this.render();
   }
 
   async render() {
@@ -34,17 +32,9 @@ class CalendarDayView extends HTMLElement {
       return;
     }
 
-    if (!this._hass) {
-      // Si estamos en modo preview, mostrar datos de ejemplo
-      if (window.location.href.includes('lovelace/preview')) {
-        this.renderPreview();
-        return;
-      }
-      this.shadowRoot.innerHTML = `
-        <ha-card>
-          <div class="error">Home Assistant instance not available</div>
-        </ha-card>
-      `;
+    // Si estamos en modo preview o no hay instancia de hass, mostrar preview
+    if (!this._hass || window.location.href.includes('lovelace/preview')) {
+      this.renderPreview();
       return;
     }
 
@@ -333,7 +323,10 @@ class CalendarDayView extends HTMLElement {
   }
 }
 
-customElements.define('calendar-day-view', CalendarDayView);
+if (!customElements.get('calendar-day-view')) {
+  customElements.define('calendar-day-view', CalendarDayView);
+}
+export { CalendarDayView };
 
 window.customCards = window.customCards || [];
 window.customCards.push({
