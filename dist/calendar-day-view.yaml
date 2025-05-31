@@ -55,15 +55,24 @@ examples:
   - title: Basic Calendar View
     description: Shows a basic calendar view with default settings
     data:
-      entity: calendar.google_calendar
-      title: "My Calendar"
+      entity: calendar.home
+      title: "Home Calendar"
 
   - title: Customized Calendar View
     description: Shows a calendar view with custom settings
     data:
-      entity: calendar.google_calendar
+      entity: calendar.home
       title: "Work Calendar"
       show_header: true
       show_time: true
       event_height: 80
-      event_color: "#ff5722" 
+      event_color: "#ff5722"
+
+preview:
+  type: custom:calendar-day-view
+  entity: calendar.home
+  title: "Calendar Preview"
+  show_header: true
+  show_time: true
+  event_height: 60
+  event_color: "#4285f4" 
