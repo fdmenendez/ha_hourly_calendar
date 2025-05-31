@@ -11,8 +11,10 @@ class CalendarDayView extends HTMLElement {
       this.config = {
         show_header: true,
         show_time: true,
-        event_height: 60,
+        event_height: 36,
         event_color: '#4285f4',
+        start_hour: 9,
+        end_hour: 22,
         ...config
       };
       this.render();
@@ -39,7 +41,9 @@ class CalendarDayView extends HTMLElement {
       }
   
       try {
-        const hours = Array.from({ length: 24 }, (_, i) => i);
+        const startHour = Number(this.config.start_hour);
+        const endHour = Number(this.config.end_hour);
+        const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => i + startHour);
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   
@@ -62,7 +66,9 @@ class CalendarDayView extends HTMLElement {
     }
   
     renderPreview() {
-      const hours = Array.from({ length: 24 }, (_, i) => i);
+      const startHour = Number(this.config?.start_hour ?? 9);
+      const endHour = Number(this.config?.end_hour ?? 22);
+      const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => i + startHour);
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   

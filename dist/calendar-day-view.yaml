@@ -37,12 +37,12 @@ schema:
     name: Event Height
     description: Height of each hour row in pixels
     required: false
-    default: 60
+    default: 36
     selector:
       number:
-        min: 30
+        min: 20
         max: 120
-        step: 10
+        step: 4
   event_color:
     name: Event Color
     description: Default color for events
@@ -50,6 +50,26 @@ schema:
     default: '#4285f4'
     selector:
       color_rgb: null
+  start_hour:
+    name: Start Hour
+    description: First hour to show (0-23)
+    required: false
+    default: 0
+    selector:
+      number:
+        min: 0
+        max: 23
+        step: 1
+  end_hour:
+    name: End Hour
+    description: Last hour to show (0-23)
+    required: false
+    default: 23
+    selector:
+      number:
+        min: 0
+        max: 23
+        step: 1
 
 examples:
   - title: Basic Calendar View
