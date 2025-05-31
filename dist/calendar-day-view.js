@@ -136,25 +136,22 @@ class CalendarDayView extends HTMLElement {
     }
 
     const entity = this.config.entity;
-    console.log('Calendar Day View: Requesting events for', entity);
-    
+
+    const start = new Date().toISOString();
+    const end = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString();
+
+    const url = `/api/calendars/${entity}?start=${start}&end=${end}`;
+
     try {
-      const state = await this._hass.callWS({
-        type: 'calendar/list_events',
-        entity_id: entity,
-        start_date_time: new Date().toISOString(),
-        end_date_time: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
-      });
-      
-      if (!state || !Array.isArray(state)) {
-        console.warn('Calendar Day View: No events received or invalid response', state);
-        return [];
-      }
-      
-      return state;
+        const response = await this._hass.fetchWithAuth(url);
+        if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data;
     } catch (error) {
-      console.error('Calendar Day View: Error fetching events', error);
-      throw new Error(`Failed to fetch calendar events: ${error.message}`);
+        console.error('Calendar Day View: Error fetching events', error);
+        throw new Error(`Failed to fetch calendar events: ${error.message}`);
     }
   }
 
