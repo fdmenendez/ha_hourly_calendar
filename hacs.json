@@ -1,9 +1,6 @@
 {
   "name": "Calendar Day View",
   "render_readme": true,
-  "domains": ["frontend"],
   "type": "module",
-  "iot_class": "calculated",
-  "filename": "dist/calendar-day-view.js",
-  "content_in_root": false
+  "filename": "calendar-day-view.js"
 } 
